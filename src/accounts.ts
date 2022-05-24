@@ -14,7 +14,7 @@ export function toExternallyOwnedAccounts(accounts: HardhatNetworkAccountsConfig
   if (Array.isArray(accounts)) {
     return accounts.map(({ privateKey }) => ({
       address: ethers.utils.computeAddress(privateKey),
-      privateKey,
+      privateKey: privateKey.toLowerCase(),
     }))
   } else {
     const { mnemonic, passphrase, path, count, initialIndex } = accounts
@@ -24,5 +24,9 @@ export function toExternallyOwnedAccounts(accounts: HardhatNetworkAccountsConfig
       .fill(0)
       .map((_, i) => hdpath + (initialIndex + i).toString())
       .map((accountpath) => hdnode.derivePath(accountpath))
+      .map(({ address, privateKey }) => ({
+        address: address.toLowerCase(),
+        privateKey: privateKey.toLowerCase(),
+      }))
   }
 }

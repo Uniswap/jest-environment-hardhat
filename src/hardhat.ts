@@ -1,6 +1,6 @@
 import 'setimmediate'
 
-import { ExternallyOwnedAccount } from '@ethersproject/abstract-signer'
+import { ExternallyOwnedAccount, Signer } from '@ethersproject/abstract-signer'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import assert from 'assert'
@@ -8,7 +8,7 @@ import hre from 'hardhat'
 import { ethers } from 'hardhat'
 
 import { Erc20__factory } from './types'
-import { Hardhat as IHardhat } from './types/hardhat'
+import { AddressLike, Hardhat as IHardhat } from './types/hardhat'
 import { WHALES } from './whales'
 
 if (!ethers) {
@@ -56,15 +56,16 @@ export class Hardhat implements IHardhat {
     ])
   }
 
-  async forkAndFund(address: string, amounts: OneOrMany<CurrencyAmount<Currency>>) {
+  async forkAndFund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>) {
     if (!Array.isArray(amounts)) return this.forkAndFund(address, [amounts])
 
     await hardhat.fork()
     return hardhat.fund(address, amounts)
   }
 
-  getBalance(address: string, currencies: OneOrMany<Currency>) {
+  getBalance(address: AddressLike, currencies: OneOrMany<Currency>) {
     if (!Array.isArray(currencies)) return this.getBalance(address, [currencies])[0]
+    if (typeof address !== 'string') return this.getBalance(address.address, currencies)
 
     return currencies.map(async (currency) => {
       const balance = await (() => {
@@ -78,20 +79,23 @@ export class Hardhat implements IHardhat {
     })
   }
 
-  setBalance(address: string, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES) {
+  setBalance(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES) {
     return this.fund(address, amounts, whales)
   }
 
-  fund(address: string, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES) {
-    if (!Array.isArray(amounts)) return this.fund(address, [amounts])
+  fund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES) {
+    if (!Array.isArray(amounts)) return this.fund(address, [amounts], whales)
+    if (typeof address !== 'string') return this.fund(address.address, amounts, whales)
 
     const impersonations = whales.map((whale) => hre.network.provider.send('hardhat_impersonateAccount', [whale]))
 
     return Promise.all(
       amounts.map(async (amount) => {
         const { currency } = amount
+        const balance = ethers.utils.parseUnits(amount.toExact(), currency.decimals)
+
         if (currency.isNative) {
-          return hre.network.provider.send('hardhat_', [address, ethers.utils.hexValue(amount.toExact())])
+          return hre.network.provider.send('hardhat_setBalance', [address, ethers.utils.hexValue(balance)])
         }
         assert(currency.isToken)
 
@@ -100,7 +104,7 @@ export class Hardhat implements IHardhat {
           const whale = hre.ethers.provider.getSigner(whales[i])
           try {
             const token = Erc20__factory.connect(currency.address, whale)
-            await token.transfer(address, ethers.utils.parseUnits(amount.toExact(), currency.decimals))
+            await token.transfer(address, balance)
             return
           } catch (e) {
             throw new Error(`Could not fund ${amount.toExact()} ${currency.symbol} from any whales`)
@@ -110,19 +114,23 @@ export class Hardhat implements IHardhat {
     )
   }
 
-  approve(address: string, spender: string, currencies: OneOrMany<Currency>) {
-    if (!Array.isArray(currencies)) return this.approve(address, spender, [currencies])
+  approve(account: ExternallyOwnedAccount | Signer, spender: AddressLike, currencies: OneOrMany<Currency | CurrencyAmount<Currency>>) {
+    if (!Array.isArray(currencies)) return this.approve(account, spender, [currencies])
+    if (typeof spender !== 'string') return this.approve(account, spender.address, currencies)
 
-    return currencies.map(async (currency) => {
+    return Promise.all(currencies.map(async (currencyOrAmount) => {
+      let [currency, limit] = 'currency' in currencyOrAmount ?
+        [currencyOrAmount.currency, ethers.utils.parseUnits(currencyOrAmount.toExact(), currencyOrAmount.currency.decimals)] :
+        [currencyOrAmount, ethers.constants.MaxUint256]
       if (currency.isNative) return
       assert(currency.isToken)
 
-      const token = Erc20__factory.connect(currency.address, hre.ethers.provider)
+      const signer = Signer.isSigner(account) ? account : new hre.ethers.Wallet(account, hre.ethers.provider)
+      const token = Erc20__factory.connect(currency.address, signer)
 
-      const limit = currency.symbol === 'USDT' ? 0 : ethers.constants.MaxUint256
       const approval = await token.approve(spender, limit)
       return approval.wait()
-    })
+    }))
   }
 
   send(method: string, params?: any[]) {

@@ -1,6 +1,5 @@
 import 'setimmediate'
 
-import chalk from 'chalk'
 import hre from 'hardhat'
 import { TASK_NODE, TASK_NODE_GET_PROVIDER, TASK_NODE_SERVER_READY } from 'hardhat/builtin-tasks/task-names'
 import { HardhatNetworkAccountsConfig, JsonRpcServer } from 'hardhat/types'
@@ -16,10 +15,6 @@ if (!hre.config.networks.hardhat.forking) {
   )
 }
 
-// Test accounts break programmatic usage. Instead, configure the test accounts after the network starts.
-const accounts = hre.network.config.accounts as HardhatNetworkAccountsConfig
-hre.network.config.accounts = []
-
 // TODO: parse url and add (WORKER_ID - 1)
 const url = hre.config.networks.localhost.url
 
@@ -31,11 +26,13 @@ const serverReady = new Promise<JsonRpcServer>((resolve) =>
 hre.run(TASK_NODE)
 
 // Address normalization is computation intensive, so do it while waiting for the server to be ready.
-const wallets = toExternallyOwnedAccounts(accounts)
+const wallets = toExternallyOwnedAccounts(hre.network.config.accounts as HardhatNetworkAccountsConfig)
 if (wallets.length > 4) {
-  process.stderr.write(chalk.yellow(`${wallets.length} hardhat accounts specified - consider specifying fewer.\n`))
+  process.stderr.write(`${wallets.length} hardhat accounts specified - consider specifying fewer.\n`)
   process.stderr.write('Specifying multiple hardhat accounts will noticeably slow your test startup time.\n\n')
 }
+
+globalThis.hardhat = new Hardhat(url, wallets)
 
 beforeAll(async () => {
   // Waits for the node server to be ready.
@@ -45,8 +42,6 @@ beforeAll(async () => {
   if (hre.config.networks.hardhat.loggingEnabled || process.argv.includes('--verbose')) {
     await hre.network.provider.send('hardhat_setLoggingEnabled', [true])
   }
-
-  globalThis.hardhat = new Hardhat(url, wallets)
 
   const elapsedMs = Date.now() - start
   process.stdout.write(`Initialized hardhat network in ${(elapsedMs / 1000).toFixed(3)} s\n\n`)
