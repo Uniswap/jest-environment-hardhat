@@ -1,15 +1,15 @@
 import 'setimmediate'
-import { Hardhat as IHardhat } from './types/hardhat'
 
 import { ExternallyOwnedAccount } from '@ethersproject/abstract-signer'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
-import { Erc20__factory } from './types'
+import assert from 'assert'
 import hre from 'hardhat'
 import { ethers } from 'hardhat'
 
+import { Erc20__factory } from './types'
+import { Hardhat as IHardhat } from './types/hardhat'
 import { WHALES } from './whales'
-import assert from 'assert'
 
 if (!ethers) {
   throw new Error(
@@ -87,23 +87,27 @@ export class Hardhat implements IHardhat {
 
     const impersonations = whales.map((whale) => hre.network.provider.send('hardhat_impersonateAccount', [whale]))
 
-    return Promise.all(amounts.map(async (amount) => {
-      const { currency } = amount
-      if (currency.isNative) return hre.network.provider.send('hardhat_', [address, ethers.utils.hexValue(amount.toExact())])
-      assert(currency.isToken)
-
-      for (let i = 0; i < whales.length; ++i) {
-        await impersonations[i]
-        const whale = hre.ethers.provider.getSigner(whales[i])
-        try {
-          const token = Erc20__factory.connect(currency.address, whale)
-          await token.transfer(address, ethers.utils.parseUnits(amount.toExact(), currency.decimals))
-          return
-        } catch (e) {
-          throw new Error(`Could not fund ${amount.toExact()} ${currency.symbol} from any whales`)
+    return Promise.all(
+      amounts.map(async (amount) => {
+        const { currency } = amount
+        if (currency.isNative) {
+          return hre.network.provider.send('hardhat_', [address, ethers.utils.hexValue(amount.toExact())])
         }
-      }
-    }))
+        assert(currency.isToken)
+
+        for (let i = 0; i < whales.length; ++i) {
+          await impersonations[i]
+          const whale = hre.ethers.provider.getSigner(whales[i])
+          try {
+            const token = Erc20__factory.connect(currency.address, whale)
+            await token.transfer(address, ethers.utils.parseUnits(amount.toExact(), currency.decimals))
+            return
+          } catch (e) {
+            throw new Error(`Could not fund ${amount.toExact()} ${currency.symbol} from any whales`)
+          }
+        }
+      })
+    )
   }
 
   approve(address: string, spender: string, currencies: OneOrMany<Currency>) {
