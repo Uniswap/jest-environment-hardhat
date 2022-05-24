@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  workflow_dispatch: # manually
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org
+          cache: 'yarn'
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn test
+        if: success()
+
+      - run: yarn release
+        if: success()
+        env:
+          NPM_CONFIG_USERCONFIG: /dev/null
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

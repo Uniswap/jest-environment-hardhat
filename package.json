@@ -9,8 +9,10 @@
   "types": "dist/types/hardhat.d.ts",
   "scripts": {
     "prepare": "yarn compile",
+    "prepublishOnly": "yarn build",
     "compile": "typechain --target ethers-v5 --out-dir src/types 'abis/**/*.json'",
     "build": "tsc",
+    "release": "semantic-release",
     "lint": "eslint .",
     "test": "echo TODO"
   },
@@ -44,6 +46,7 @@
     "hardhat": "^2.9.6",
     "jest": "^28.1.0",
     "prettier": "^2.6.2",
+    "semantic-release": "^19.0.2",
     "typechain": "^8.0.0",
     "typescript": "^4.6.4"
   }
