@@ -25,6 +25,20 @@ const serverReady = new Promise<JsonRpcServer>((resolve) =>
 )
 hre.run(TASK_NODE)
 
+// Squelch asm linking failure.
+// It likely occurs due to jest's sandboxxed environments, seems to be benign, and pollutes stderr.
+const stderrWrite = process.stderr.write
+process.stderr.write = (chunk, callback) => {
+  if (chunk.toString().includes('Linking failure in asm.js: Unexpected stdlib member')) {
+    callback()
+    return true
+  }
+  return stderrWrite.call(process, chunk, callback)
+}
+serverReady.then(() => {
+  process.stderr.write = stderrWrite
+})
+
 // Address normalization is computation intensive, so do it while waiting for the server to be ready.
 const wallets = toExternallyOwnedAccounts(hre.network.config.accounts as HardhatNetworkAccountsConfig)
 if (wallets.length > 4) {
