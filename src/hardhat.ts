@@ -114,23 +114,33 @@ export class Hardhat implements IHardhat {
     )
   }
 
-  approve(account: ExternallyOwnedAccount | Signer, spender: AddressLike, currencies: OneOrMany<Currency | CurrencyAmount<Currency>>) {
+  approve(
+    account: ExternallyOwnedAccount | Signer,
+    spender: AddressLike,
+    currencies: OneOrMany<Currency | CurrencyAmount<Currency>>
+  ) {
     if (!Array.isArray(currencies)) return this.approve(account, spender, [currencies])
     if (typeof spender !== 'string') return this.approve(account, spender.address, currencies)
 
-    return Promise.all(currencies.map(async (currencyOrAmount) => {
-      let [currency, limit] = 'currency' in currencyOrAmount ?
-        [currencyOrAmount.currency, ethers.utils.parseUnits(currencyOrAmount.toExact(), currencyOrAmount.currency.decimals)] :
-        [currencyOrAmount, ethers.constants.MaxUint256]
-      if (currency.isNative) return
-      assert(currency.isToken)
+    return Promise.all(
+      currencies.map(async (currencyOrAmount) => {
+        const [currency, limit] =
+          'currency' in currencyOrAmount
+            ? [
+                currencyOrAmount.currency,
+                ethers.utils.parseUnits(currencyOrAmount.toExact(), currencyOrAmount.currency.decimals),
+              ]
+            : [currencyOrAmount, ethers.constants.MaxUint256]
+        if (currency.isNative) return
+        assert(currency.isToken)
 
-      const signer = Signer.isSigner(account) ? account : new hre.ethers.Wallet(account, hre.ethers.provider)
-      const token = Erc20__factory.connect(currency.address, signer)
+        const signer = Signer.isSigner(account) ? account : new hre.ethers.Wallet(account, hre.ethers.provider)
+        const token = Erc20__factory.connect(currency.address, signer)
 
-      const approval = await token.approve(spender, limit)
-      return approval.wait()
-    }))
+        const approval = await token.approve(spender, limit)
+        return approval.wait()
+      })
+    )
   }
 
   send(method: string, params?: any[]) {
