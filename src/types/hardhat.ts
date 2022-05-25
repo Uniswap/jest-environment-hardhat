@@ -1,4 +1,4 @@
-import { ExternallyOwnedAccount } from '@ethersproject/abstract-signer'
+import { ExternallyOwnedAccount, Signer } from '@ethersproject/abstract-signer'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 
@@ -13,6 +13,8 @@ declare global {
     }
   }
 }
+
+export type AddressLike = string | { address: string }
 
 export interface Hardhat {
   /** The JSON-RPC url to connect to the hardhat network. */
@@ -37,16 +39,16 @@ export interface Hardhat {
    * A convenience method to reset the mainnet fork and fund an account with ETH / ERC-20's.
    * @see {@link fork} and {@link fund}.
    */
-  forkAndFund(address: string, amount: CurrencyAmount<Currency>): Promise<void>
-  forkAndFund(address: string, amounts: CurrencyAmount<Currency>[]): Promise<void>
+  forkAndFund(address: AddressLike, amount: CurrencyAmount<Currency>): Promise<void>
+  forkAndFund(address: AddressLike, amounts: CurrencyAmount<Currency>[]): Promise<void>
 
   /** Gets the balance of ETH ERC-20's held by the address. */
-  getBalance(address: string, currency: Currency): Promise<CurrencyAmount<Currency>>
-  getBalance(address: string, currencies: Currency[]): Promise<CurrencyAmount<Currency>[]>
+  getBalance(address: AddressLike, currency: Currency): Promise<CurrencyAmount<Currency>>
+  getBalance(address: AddressLike, currencies: Currency[]): Promise<CurrencyAmount<Currency>[]>
 
   /** Attempts to fund an account with ETH or ERC-20's. @see {@link fund}. */
-  setBalance(address: string, amount: CurrencyAmount<Currency>, whales?: string[]): Promise<void>
-  setBalance(address: string, amounts: CurrencyAmount<Currency>[], whales?: string[]): Promise<void>
+  setBalance(address: AddressLike, amount: CurrencyAmount<Currency>, whales?: string[]): Promise<void>
+  setBalance(address: AddressLike, amounts: CurrencyAmount<Currency>[], whales?: string[]): Promise<void>
 
   /**
    * Attempts to fund an account with ETH / ERC-20's.
@@ -56,16 +58,16 @@ export interface Hardhat {
    * @param amount If in ETH, the amount to set the balance to. If an ERC-20, the amount to transfer.
    * @param whales If set, overrides the list of known whale addresses from which to transfer ERC-20's.
    */
-  fund(address: string, amount: CurrencyAmount<Currency>, whales?: string[]): Promise<void>
-  fund(address: string, amounts: CurrencyAmount<Currency>[], whales?: string[]): Promise<void>
+  fund(address: AddressLike, amount: CurrencyAmount<Currency>, whales?: string[]): Promise<void>
+  fund(address: AddressLike, amounts: CurrencyAmount<Currency>[], whales?: string[]): Promise<void>
 
   /**
    * Approves the spender to spend currencies on behalf of an account.
-   * @param address  The address of the account which owns the currency.
+   * @param account The account which owns the currency.
    * @param spender The address of the spender.
    */
-  approve(address: string, spender: string, currency: Currency): Promise<void>
-  approve(address: string, spender: string, currencies: Currency[]): Promise<void>
+  approve(account: ExternallyOwnedAccount | Signer, spender: AddressLike, currency: Currency | CurrencyAmount<Currency>): Promise<void>
+  approve(account: ExternallyOwnedAccount | Signer, spender: AddressLike, currencies: (Currency | CurrencyAmount<Currency>)[]): Promise<void>
 
   /**
    * Sends messages to the hardhat network.

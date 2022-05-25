@@ -3,6 +3,9 @@
 # generated contract types
 src/types/
 
+# hardhat cache
+cache/
+
 # dependency management
 package-lock.json
 node_modules/
