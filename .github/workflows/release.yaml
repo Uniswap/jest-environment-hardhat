@@ -19,6 +19,9 @@ jobs:
 
       - run: yarn test
         if: success()
+      
+      - run: yarn test:e2e
+        if: success()
 
       - run: yarn release
         if: success()

@@ -15,15 +15,16 @@ if (!hre.config.networks.hardhat.forking) {
   )
 }
 
-// TODO: parse url and add (WORKER_ID - 1)
-const url = hre.config.networks.localhost.url
+const port = 8545 + Number(process.env.JEST_WORKER_ID)
+const url = new URL(hre.config.networks.localhost.url)
+url.port = port.toString()
 
 // Override the GET_PROVIDER task to avoid unnecessary time-intensive evm calls.
 hre.tasks[TASK_NODE_GET_PROVIDER].setAction(async () => hre.network.provider)
 const serverReady = new Promise<JsonRpcServer>((resolve) =>
   hre.tasks[TASK_NODE_SERVER_READY].setAction(async ({ server }) => resolve(server))
 )
-hre.run(TASK_NODE)
+hre.run(TASK_NODE, { port: port })
 
 // Address normalization is computation intensive, so do it while waiting for the server to be ready.
 const wallets = toExternallyOwnedAccounts(hre.network.config.accounts as HardhatNetworkAccountsConfig)
@@ -32,7 +33,7 @@ if (wallets.length > 4) {
   process.stderr.write('Specifying multiple hardhat accounts will noticeably slow your test startup time.\n\n')
 }
 
-globalThis.hardhat = new Hardhat(url, wallets)
+globalThis.hardhat = new Hardhat(url.toString(), wallets)
 
 beforeAll(async () => {
   // Waits for the node server to be ready.
