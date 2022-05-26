@@ -3,7 +3,7 @@ require('@nomiclabs/hardhat-ethers')
 require('dotenv').config()
 
 const mainnetFork = {
-  url: `${process.env.JSON_RPC_URL}`,
+  url: `${process.env.JSON_RPC_PROVIDER}`,
   blockNumber: 13582625,
 }
 
