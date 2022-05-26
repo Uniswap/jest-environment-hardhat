@@ -7,22 +7,6 @@
   "license": "GPL-3.0-or-later",
   "main": "dist/node.js",
   "types": "dist/types/hardhat.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/node.js",
-      "types": "./dist/types/hardhat.d.ts"
-    },
-    "./setup": {
-      "import": "./dist/setup.js",
-      "types": "./dist/setup.d.ts"
-    },
-    "./node": {
-      "import": "./dist/node.js"
-    },
-    "./jsdom": {
-      "import": "./dist/jsdom.js"
-    }
-  },
   "scripts": {
     "prepare": "yarn compile",
     "prepublishOnly": "yarn build",
@@ -31,7 +15,7 @@
     "release": "semantic-release",
     "lint": "eslint .",
     "test": "jest test/",
-    "test:e2e": "jest e2e/"
+    "test:e2e": "jest e2e/ --testSequencer ./e2e/sequencer.js --maxWorkers 2"
   },
   "dependencies": {
     "setimmediate": "^1.0.5"
