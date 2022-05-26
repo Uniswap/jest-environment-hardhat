@@ -11,7 +11,7 @@ const start = Date.now()
 
 if (!hre.config.networks.hardhat.forking) {
   throw new Error(
-    '`forking` must be specified to use hardhat-plugin-jest.\nSee https://hardhat.org/hardhat-network/guides/mainnet-forking.html#mainnet-forking.'
+    '`forking` must be specified to use jest-environment-hardhat.\nSee https://hardhat.org/hardhat-network/guides/mainnet-forking.html#mainnet-forking.'
   )
 }
 

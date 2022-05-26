@@ -5,7 +5,7 @@ import { HardhatNetworkAccountsConfig } from 'hardhat/types'
 
 if (!ethers) {
   throw new Error(
-    'hardhat-plugin-jest requires the hardhat-ethers plugin to be installed.\nSee https://hardhat.org/plugins/nomiclabs-hardhat-ethers.html#hardhat-ethers.'
+    'jest-environment-hardhat requires the hardhat-ethers plugin to be installed.\nSee https://hardhat.org/plugins/nomiclabs-hardhat-ethers.html#hardhat-ethers.'
   )
 }
 
