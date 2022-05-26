@@ -4,6 +4,6 @@
  */
 
 it('runs', (done) => {
-  expect(hardhat).toBeDefined()
+  expect(globalThis.hardhat).toBeDefined()
   setTimeout(done, 5000)
 }, 10000)

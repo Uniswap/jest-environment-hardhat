@@ -1,6 +1,6 @@
 import JsdomEnvironment from 'jest-environment-jsdom'
 
-import { setup, teardown } from './'
+import { setup, teardown } from './core'
 
 export default class HardhatNodeEnvironment extends JsdomEnvironment {
   constructor(config, context) {

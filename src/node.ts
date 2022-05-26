@@ -1,6 +1,6 @@
 import NodeEnvironment from 'jest-environment-node'
 
-import { setup, teardown } from './'
+import { setup, teardown } from './core'
 
 export default class HardhatNodeEnvironment extends NodeEnvironment {
   constructor(config, context) {

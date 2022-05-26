@@ -9,11 +9,12 @@
   "types": "dist/types/hardhat.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/hardhat.d.ts",
-      "import": "./dist/node.js"
+      "import": "./dist/node.js",
+      "types": "./dist/types/hardhat.d.ts"
     },
-    "./index": {
-      "import": "./dist/index.js"
+    "./core": {
+      "import": "./dist/core.js",
+      "types": "./dist/core.d.ts"
     },
     "./node": {
       "import": "./dist/node.js"
