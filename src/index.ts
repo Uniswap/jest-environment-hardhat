@@ -35,7 +35,7 @@ if (wallets.length > 4) {
 
 globalThis.hardhat = new Hardhat(url.toString(), wallets)
 
-beforeAll(async () => {
+export async function setup() {
   // Waits for the node server to be ready.
   await serverReady
 
@@ -46,10 +46,10 @@ beforeAll(async () => {
 
   const elapsedMs = Date.now() - start
   process.stdout.write(`Initialized hardhat network in ${(elapsedMs / 1000).toFixed(3)} s\n\n`)
-})
+}
 
-afterAll(async () => {
+export async function teardown() {
   // Waits for the node server to shut down.
   const server = await serverReady
   await server.close()
-})
+}
