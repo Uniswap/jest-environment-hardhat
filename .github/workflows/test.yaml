@@ -23,6 +23,8 @@ jobs:
       - run: yarn install --frozen-lockfile
 
       - run: yarn test
+        env:
+          JSON_RPC_PROVIDER: ${{ secrets.JSON_RPC_PROVIDER }}
 
       - run: yarn build
 
