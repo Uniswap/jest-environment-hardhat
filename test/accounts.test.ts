@@ -1,3 +1,8 @@
+/**
+ * This test intentionally runs in the jest environment, so it will fail to link hardhat's asm dependency.
+ * This is expected, and necessary to test that derived accounts match hardhat's.
+ */
+
 import hre from 'hardhat'
 
 import { toExternallyOwnedAccounts } from '../src/accounts'

@@ -15,7 +15,7 @@
     "release": "semantic-release",
     "lint": "eslint .",
     "test": "jest test/",
-    "test:e2e": "jest e2e/"
+    "test:e2e": "jest e2e/ --testSequencer ./e2e/sequencer.js"
   },
   "dependencies": {
     "setimmediate": "^1.0.5"
@@ -35,7 +35,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@semantic-release/git": "^10.0.1",
     "@typechain/ethers-v5": "^10.0.0",
-    "@types/jest": "^27.5.1",
+    "@types/jest": "^28.1.0",
     "@typescript-eslint/eslint-plugin": "^5.26.0",
     "@typescript-eslint/parser": "^5.26.0",
     "@uniswap/sdk-core": "^3.0.1",

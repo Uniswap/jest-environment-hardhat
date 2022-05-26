@@ -22,7 +22,7 @@ export default async function setup(): Promise<() => Promise<void>> {
   // Override the GET_PROVIDER task to avoid unnecessary time-intensive evm calls.
   hre.tasks[TASK_NODE_GET_PROVIDER].setAction(async () => hre.network.provider)
   const port = 8545 + Number(process.env.JEST_WORKER_ID || 1)
-  hre.run(TASK_NODE, { port })
+  const run = hre.run(TASK_NODE, { port })
   const serverReady = new Promise<{ url: string; server: JsonRpcServer }>((resolve) =>
     hre.tasks[TASK_NODE_SERVER_READY].setAction(async ({ address, port, server }) => {
       const url = 'http://' + address + ':' + port
@@ -45,5 +45,8 @@ export default async function setup(): Promise<() => Promise<void>> {
     await hre.network.provider.send('hardhat_setLoggingEnabled', [true])
   }
 
-  return async () => await server.close()
+  return async () => {
+    await server.close()
+    await run
+  }
 }

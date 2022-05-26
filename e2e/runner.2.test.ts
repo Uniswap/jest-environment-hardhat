@@ -1,8 +1,11 @@
 /**
- * This test file exists to test that jest-environment-hardhat runs correctly with multiple jest runners.
- * @jest-environment ./src/jsdom.ts
+ * @jest-environment ./src/node.ts
  */
 
-it('runs', () => {
+it('runs', async () => {
+  expect(process.env.JEST_WORKER_ID).toBe('2')
   expect(globalThis.hardhat).toBeDefined()
-})
+
+  // Hang for 5 seconds to stall other tests using the same port.
+  await new Promise((resolve) => setTimeout(resolve, 5000))
+}, 6000)
