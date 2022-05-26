@@ -1,20 +1,22 @@
 import NodeEnvironment from 'jest-environment-node'
 
-import { setup, teardown } from './core'
+import setup from './setup'
 
 export default class HardhatNodeEnvironment extends NodeEnvironment {
+  _teardown: Awaited<ReturnType<typeof setup>>
+
   constructor(config, context) {
     super(config, context)
   }
 
   async setup() {
     await super.setup()
-    await setup()
+    this._teardown = await setup()
     this.global.hardhat = hardhat
   }
 
   async teardown() {
-    await teardown()
+    await this._teardown()
     await super.teardown()
   }
 

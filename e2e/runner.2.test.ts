@@ -3,7 +3,6 @@
  * @jest-environment ./src/jsdom.ts
  */
 
-it('runs', (done) => {
+it('runs', () => {
   expect(globalThis.hardhat).toBeDefined()
-  setTimeout(done, 5000)
-}, 10000)
+})
