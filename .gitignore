@@ -19,6 +19,7 @@ dist/
 *.swp
 
 # misc
+.env
 .DS_Store
 .netlify/
 npm-debug.log*
