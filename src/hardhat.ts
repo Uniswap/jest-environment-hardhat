@@ -4,25 +4,20 @@ import { ExternallyOwnedAccount, Signer } from '@ethersproject/abstract-signer'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import assert from 'assert'
-import hre from 'hardhat'
-import { ethers } from 'hardhat'
+import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
 import { Erc20__factory } from './types'
 import { AddressLike, Hardhat as IHardhat } from './types/hardhat'
 import { WHALES } from './whales'
 
-if (!ethers) {
-  throw new Error(
-    'jest-environment-hardhat requires the hardhat-ethers plugin to be installed.\nSee https://hardhat.org/plugins/nomiclabs-hardhat-ethers.html#hardhat-ethers.'
-  )
-}
-
 type OneOrMany<T> = T | T[]
 
 export class Hardhat implements IHardhat {
-  public readonly providers: JsonRpcProvider[]
+  readonly url: string
+  readonly providers: JsonRpcProvider[]
 
-  constructor(readonly url: string, readonly accounts: ExternallyOwnedAccount[]) {
+  constructor(private hre: HardhatRuntimeEnvironment, readonly accounts: ExternallyOwnedAccount[]) {
+    this.url = hre.config.networks.localhost.url
     this.providers = accounts.map(
       (account) =>
         new Proxy(hre.ethers.provider, {
@@ -48,10 +43,10 @@ export class Hardhat implements IHardhat {
     return this.providers[0]
   }
 
-  fork(blockNumber = hre.config.networks.hardhat.forking?.blockNumber) {
-    return hre.network.provider.send('hardhat_reset', [
+  fork(blockNumber = this.hre.config.networks.hardhat.forking?.blockNumber) {
+    return this.hre.network.provider.send('hardhat_reset', [
       {
-        forking: { jsonRpcUrl: hre.config.networks.hardhat.forking?.url, blockNumber },
+        forking: { jsonRpcUrl: this.hre.config.networks.hardhat.forking?.url, blockNumber },
       },
     ])
   }
@@ -69,10 +64,10 @@ export class Hardhat implements IHardhat {
 
     return currencies.map(async (currency) => {
       const balance = await (() => {
-        if (currency.isNative) return hre.ethers.provider.getBalance(address)
+        if (currency.isNative) return this.hre.ethers.provider.getBalance(address)
         assert(currency.isToken)
 
-        const token = Erc20__factory.connect(currency.address, hre.ethers.provider)
+        const token = Erc20__factory.connect(currency.address, this.hre.ethers.provider)
         return token.balanceOf(address)
       })()
       return CurrencyAmount.fromRawAmount(currency, balance.toString())
@@ -87,21 +82,24 @@ export class Hardhat implements IHardhat {
     if (!Array.isArray(amounts)) return this.fund(address, [amounts], whales)
     if (typeof address !== 'string') return this.fund(address.address, amounts, whales)
 
-    const impersonations = whales.map((whale) => hre.network.provider.send('hardhat_impersonateAccount', [whale]))
+    const impersonations = whales.map((whale) => this.hre.network.provider.send('hardhat_impersonateAccount', [whale]))
 
     return Promise.all(
       amounts.map(async (amount) => {
         const { currency } = amount
-        const balance = ethers.utils.parseUnits(amount.toExact(), currency.decimals)
+        const balance = this.hre.ethers.utils.parseUnits(amount.toExact(), currency.decimals)
 
         if (currency.isNative) {
-          return hre.network.provider.send('hardhat_setBalance', [address, ethers.utils.hexValue(balance)])
+          return this.hre.network.provider.send('hardhat_setBalance', [
+            address,
+            this.hre.ethers.utils.hexValue(balance),
+          ])
         }
         assert(currency.isToken)
 
         for (let i = 0; i < whales.length; ++i) {
           await impersonations[i]
-          const whale = hre.ethers.provider.getSigner(whales[i])
+          const whale = this.hre.ethers.provider.getSigner(whales[i])
           try {
             const token = Erc20__factory.connect(currency.address, whale)
             await token.transfer(address, balance)
@@ -128,13 +126,15 @@ export class Hardhat implements IHardhat {
           'currency' in currencyOrAmount
             ? [
                 currencyOrAmount.currency,
-                ethers.utils.parseUnits(currencyOrAmount.toExact(), currencyOrAmount.currency.decimals),
+                this.hre.ethers.utils.parseUnits(currencyOrAmount.toExact(), currencyOrAmount.currency.decimals),
               ]
-            : [currencyOrAmount, ethers.constants.MaxUint256]
+            : [currencyOrAmount, this.hre.ethers.constants.MaxUint256]
         if (currency.isNative) return
         assert(currency.isToken)
 
-        const signer = Signer.isSigner(account) ? account : new hre.ethers.Wallet(account, hre.ethers.provider)
+        const signer = Signer.isSigner(account)
+          ? account
+          : new this.hre.ethers.Wallet(account, this.hre.ethers.provider)
         const token = Erc20__factory.connect(currency.address, signer)
 
         const approval = await token.approve(spender, limit)
@@ -144,6 +144,6 @@ export class Hardhat implements IHardhat {
   }
 
   send(method: string, params?: any[]) {
-    return hre.network.provider.send(method, params)
+    return this.hre.network.provider.send(method, params)
   }
 }

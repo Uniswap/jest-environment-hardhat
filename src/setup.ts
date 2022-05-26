@@ -7,28 +7,34 @@ import { HardhatNetworkAccountsConfig, JsonRpcServer } from 'hardhat/types'
 import { toExternallyOwnedAccounts } from './accounts'
 import { Hardhat } from './hardhat'
 
-if (!hre.config.networks.hardhat.forking) {
-  throw new Error(
-    '`forking` must be specified to use jest-environment-hardhat.\nSee https://hardhat.org/hardhat-network/guides/mainnet-forking.html#mainnet-forking.'
-  )
-}
-
-// Override the GET_PROVIDER task to avoid unnecessary time-intensive evm calls.
-hre.tasks[TASK_NODE_GET_PROVIDER].setAction(async () => hre.network.provider)
-
-const wallets = toExternallyOwnedAccounts(hre.network.config.accounts as HardhatNetworkAccountsConfig)
-if (wallets.length > 4) {
-  process.stderr.write(`${wallets.length} hardhat accounts specified - consider specifying fewer.\n`)
-  process.stderr.write('Specifying multiple hardhat accounts will noticeably slow your test startup time.\n\n')
-}
-
-globalThis.hardhat = new Hardhat(hre.config.networks.localhost.url, wallets)
-
 export default async function setup(): Promise<() => Promise<void>> {
+  if (!hre.config.networks.hardhat.forking) {
+    throw new Error(
+      '`forking` must be specified to use jest-environment-hardhat.\nSee https://hardhat.org/hardhat-network/guides/mainnet-forking.html#mainnet-forking.'
+    )
+  }
+  if (!hre.ethers) {
+    throw new Error(
+      'jest-environment-hardhat requires the hardhat-ethers plugin to be installed.\nSee https://hardhat.org/plugins/nomiclabs-hardhat-ethers.html#hardhat-ethers.'
+    )
+  }
+
+  // Override the GET_PROVIDER task to avoid unnecessary time-intensive evm calls.
+  hre.tasks[TASK_NODE_GET_PROVIDER].setAction(async () => hre.network.provider)
   hre.run(TASK_NODE)
-  const server = await new Promise<JsonRpcServer>((resolve) =>
+  const serverReady = new Promise<JsonRpcServer>((resolve) =>
     hre.tasks[TASK_NODE_SERVER_READY].setAction(async ({ server }) => resolve(server))
   )
+
+  // Deriving ExternallyOwnedAccounts is computationally expensive, so it is done while waiting for the server to come up.
+  const wallets = toExternallyOwnedAccounts(hre.network.config.accounts as HardhatNetworkAccountsConfig)
+  if (wallets.length > 4) {
+    process.stderr.write(`${wallets.length} hardhat accounts specified - consider specifying fewer.\n`)
+    process.stderr.write('Specifying multiple hardhat accounts will noticeably slow your test startup time.\n\n')
+  }
+
+  const server = await serverReady
+  globalThis.hardhat = new Hardhat(hre, wallets)
 
   // Enables hardhat logging if --verbose was passed.
   if (hre.config.networks.hardhat.loggingEnabled || process.argv.includes('--verbose')) {
