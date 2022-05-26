@@ -53,14 +53,16 @@ export class Hardhat implements IHardhat {
     ])
   }
 
-  async forkAndFund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>) {
+  async forkAndFund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>): Promise<void> {
     if (!Array.isArray(amounts)) return this.forkAndFund(address, [amounts])
 
     await hardhat.fork()
     return hardhat.fund(address, amounts)
   }
 
-  getBalance(address: AddressLike, currencies: OneOrMany<Currency>) {
+  getBalance(address: AddressLike, currencies: Currency): Promise<CurrencyAmount<Currency>>
+  getBalance(address: AddressLike, currencies: Currency[]): Promise<CurrencyAmount<Currency>>[]
+  getBalance(address: AddressLike, currencies: OneOrMany<Currency>): OneOrMany<Promise<CurrencyAmount<Currency>>> {
     if (!Array.isArray(currencies)) return this.getBalance(address, [currencies])[0]
     if (typeof address !== 'string') return this.getBalance(address.address, currencies)
 
@@ -80,13 +82,13 @@ export class Hardhat implements IHardhat {
     return this.fund(address, amounts, whales)
   }
 
-  fund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES) {
+  async fund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES): Promise<void> {
     if (!Array.isArray(amounts)) return this.fund(address, [amounts], whales)
     if (typeof address !== 'string') return this.fund(address.address, amounts, whales)
 
     const impersonations = whales.map((whale) => this.hre.network.provider.send('hardhat_impersonateAccount', [whale]))
 
-    return Promise.all(
+    await Promise.all(
       amounts.map(async (amount) => {
         const { currency } = amount
         const balance = this.hre.ethers.utils.parseUnits(amount.toExact(), currency.decimals)
@@ -114,15 +116,15 @@ export class Hardhat implements IHardhat {
     )
   }
 
-  approve(
+  async approve(
     account: ExternallyOwnedAccount | Signer,
     spender: AddressLike,
     currencies: OneOrMany<Currency | CurrencyAmount<Currency>>
-  ) {
+  ): Promise<void> {
     if (!Array.isArray(currencies)) return this.approve(account, spender, [currencies])
     if (typeof spender !== 'string') return this.approve(account, spender.address, currencies)
 
-    return Promise.all(
+    await Promise.all(
       currencies.map(async (currencyOrAmount) => {
         const [currency, limit] =
           'currency' in currencyOrAmount

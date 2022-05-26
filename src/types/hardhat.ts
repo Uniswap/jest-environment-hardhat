@@ -44,7 +44,7 @@ export interface Hardhat {
 
   /** Gets the balance of ETH ERC-20's held by the address. */
   getBalance(address: AddressLike, currency: Currency): Promise<CurrencyAmount<Currency>>
-  getBalance(address: AddressLike, currencies: Currency[]): Promise<CurrencyAmount<Currency>[]>
+  getBalance(address: AddressLike, currencies: Currency[]): Promise<CurrencyAmount<Currency>>[]
 
   /** Attempts to fund an account with ETH or ERC-20's. @see {@link fund}. */
   setBalance(address: AddressLike, amount: CurrencyAmount<Currency>, whales?: string[]): Promise<void>
