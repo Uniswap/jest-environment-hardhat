@@ -24,7 +24,7 @@ hre.tasks[TASK_NODE_GET_PROVIDER].setAction(async () => hre.network.provider)
 const serverReady = new Promise<JsonRpcServer>((resolve) =>
   hre.tasks[TASK_NODE_SERVER_READY].setAction(async ({ server }) => resolve(server))
 )
-hre.run(TASK_NODE, { port: port })
+hre.run(TASK_NODE, { port })
 
 // Address normalization is computation intensive, so do it while waiting for the server to be ready.
 const wallets = toExternallyOwnedAccounts(hre.network.config.accounts as HardhatNetworkAccountsConfig)
