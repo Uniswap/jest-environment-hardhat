@@ -21,7 +21,7 @@ yarn add -D @uniswap/jest-environment-hardhat
 
 Then, use the runner either using a doc-comment, or using jest configuration. See the [jest documentation](https://jestjs.io/docs/configuration#testenvironment-string) for more.
 
-`@uniswap/jest-environment-hardhat` extends a `node` environment. A `jsdom` environment is also available, using `@uniswap/jest-environment-hardhat/jsdom`.
+`@uniswap/jest-environment-hardhat` extends a `node` environment. A `jsdom` environment is also available, using `@uniswap/jest-environment-hardhat/dist/jsdom`.
 
 ### Using a doc-comment
 
@@ -56,4 +56,4 @@ For examples of how to interact with the hardhat network, see the [tests](./test
 
 ### Typescript
 
-If you are using Typescript, you can import the types by adding `import @uniswap/jest-environment-hardat` to your test files.
+If you are using Typescript, you can import types by adding `import @uniswap/jest-environment-hardat` to your test file, or by adding `@uniswap/jest-environment-hardhat` types to your `tsconfig`.
