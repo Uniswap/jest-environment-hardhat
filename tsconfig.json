@@ -16,7 +16,7 @@
     ]
   },
   "files": [
-    "src/core.ts",
+    "src/setup.ts",
     "src/node.ts",
     "src/jsdom.ts"
   ]

@@ -3,7 +3,7 @@ import NodeEnvironment from 'jest-environment-node'
 import setup from './setup'
 
 export default class HardhatNodeEnvironment extends NodeEnvironment {
-  _teardown: Awaited<ReturnType<typeof setup>>
+  _teardown: Awaited<ReturnType<typeof setup>> = () => Promise.resolve()
 
   constructor(config, context) {
     super(config, context)

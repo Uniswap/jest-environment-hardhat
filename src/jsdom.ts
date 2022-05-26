@@ -3,7 +3,7 @@ import JsdomEnvironment from 'jest-environment-jsdom'
 import setup from './setup'
 
 export default class HardhatNodeEnvironment extends JsdomEnvironment {
-  _teardown: Awaited<ReturnType<typeof setup>>
+  _teardown: Awaited<ReturnType<typeof setup>> = () => Promise.resolve()
 
   constructor(config, context) {
     super(config, context)
