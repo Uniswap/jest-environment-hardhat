@@ -1,7 +1,6 @@
-import { setup, teardown } from '../src/core'
-
 import { CurrencyAmount, Ether, Token } from '@uniswap/sdk-core'
 
+import { setup, teardown } from '../src/core'
 import { Erc20__factory } from '../src/types'
 
 const CHAIN_ID = 1
