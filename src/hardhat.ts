@@ -13,11 +13,13 @@ import { WHALES } from './whales'
 type OneOrMany<T> = T | T[]
 
 export class Hardhat implements IHardhat {
-  readonly url: string
   readonly providers: JsonRpcProvider[]
 
-  constructor(private hre: HardhatRuntimeEnvironment, readonly accounts: ExternallyOwnedAccount[]) {
-    this.url = hre.config.networks.localhost.url
+  constructor(
+    private hre: HardhatRuntimeEnvironment,
+    readonly url: string,
+    readonly accounts: ExternallyOwnedAccount[]
+  ) {
     this.providers = accounts.map(
       (account) =>
         new Proxy(hre.ethers.provider, {
