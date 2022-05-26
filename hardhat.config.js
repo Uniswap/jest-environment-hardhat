@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 require('@nomiclabs/hardhat-ethers')
+require('dotenv').config()
 
 const mainnetFork = {
-  url: 'https://eth-mainnet.alchemyapi.io/v2/lhVWQ3rY2i5_OZtYkU4Lzg_OsDT97Eoz',
+  url: `${process.env.JSON_RPC_PROVIDER}`,
   blockNumber: 13582625,
 }
 
