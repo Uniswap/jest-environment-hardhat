@@ -1,7 +1,6 @@
-import '../src/index'
-
 import { CurrencyAmount, Ether, Token } from '@uniswap/sdk-core'
 
+import setup from '../src/setup'
 import { Erc20__factory } from '../src/types'
 
 const CHAIN_ID = 1
@@ -9,6 +8,12 @@ const ETH = Ether.onChain(CHAIN_ID)
 const UNI = new Token(CHAIN_ID, '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', 18, 'UNI')
 const USDT = new Token(CHAIN_ID, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT')
 const USDT_TREASURY = '0x5754284f345afc66a98fbb0a0afe71e0f007b949'
+
+let teardown: Awaited<ReturnType<typeof setup>>
+beforeAll(async () => {
+  teardown = await setup()
+})
+afterAll(async () => await teardown())
 
 describe('Hardhat', () => {
   beforeEach(async () => await hardhat.fork())
