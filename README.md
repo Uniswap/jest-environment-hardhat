@@ -10,13 +10,13 @@ A jest environment with hardhat built in.
 
 ## Installation
 
-First, install `@uniswap/jest-environment-plugin` and its dependencies using `yarn`.
+First, install `@uniswap/jest-environment-hardhat` and its dependencies using `yarn`.
 
 The environment needs `@nomiclabs/hardhat-ethers`, `ethers`, and `hardhat` installed to run. These are installed as peer dependencies to ensure that you retain control over versioning.
 
 ```sh
 yarn add -D @nomiclabs/hardhat-ethers ethers hardhat
-yarn add -D @uniswap/jest-environment-plugin
+yarn add -D @uniswap/jest-environment-hardhat
 ```
 
 Then, use the runner either using a doc-comment, or using jest configuration. See the [jest documentation](https://jestjs.io/docs/configuration#testenvironment-string) for more.
