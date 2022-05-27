@@ -7,6 +7,7 @@ declare global {
   // eslint-disable-next-line no-var
   var hardhat: Hardhat
 
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface Global {
       hardhat: Hardhat
@@ -66,8 +67,16 @@ export interface Hardhat {
    * @param account The account which owns the currency.
    * @param spender The address of the spender.
    */
-  approve(account: ExternallyOwnedAccount | Signer, spender: AddressLike, currency: Currency | CurrencyAmount<Currency>): Promise<void>
-  approve(account: ExternallyOwnedAccount | Signer, spender: AddressLike, currencies: (Currency | CurrencyAmount<Currency>)[]): Promise<void>
+  approve(
+    account: ExternallyOwnedAccount | Signer,
+    spender: AddressLike,
+    currency: Currency | CurrencyAmount<Currency>
+  ): Promise<void>
+  approve(
+    account: ExternallyOwnedAccount | Signer,
+    spender: AddressLike,
+    currencies: (Currency | CurrencyAmount<Currency>)[]
+  ): Promise<void>
 
   /**
    * Sends messages to the hardhat network.

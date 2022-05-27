@@ -6,8 +6,8 @@ import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import assert from 'assert'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
+import { AddressLike, Hardhat as IHardhat } from '../hardhat'
 import { Erc20__factory } from '../types'
-import { AddressLike, Hardhat as IHardhat } from '../types/hardhat'
 import { WHALES } from './whales'
 
 type OneOrMany<T> = T | T[]

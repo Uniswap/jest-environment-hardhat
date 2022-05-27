@@ -6,7 +6,7 @@
   "author": "Zach Pomerantz <zzmp@uniswap.org>",
   "license": "GPL-3.0-or-later",
   "main": "dist/node.js",
-  "types": "dist/types/hardhat.d.ts",
+  "types": "dist/hardhat.d.ts",
   "scripts": {
     "prepare": "yarn compile",
     "prepublishOnly": "yarn build",
