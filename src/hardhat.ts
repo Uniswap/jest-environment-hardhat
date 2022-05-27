@@ -1,6 +1,7 @@
 import { ExternallyOwnedAccount, Signer } from '@ethersproject/abstract-signer'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
+import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
 declare global {
   // var is required to add the typing to globalThis.
@@ -17,6 +18,12 @@ declare global {
 
 export type AddressLike = string | { address: string }
 
+/**
+ * jest's Hardhat interface.
+ * Use this to interact with the hardhat network from your tests.
+ *
+ * For example usage, see the tests at ./internal/hardhat.test.ts.
+ */
 export interface Hardhat {
   /** The JSON-RPC url to connect to the hardhat network. */
   readonly url: string
@@ -83,4 +90,10 @@ export interface Hardhat {
    * @see {@link https://hardhat.org/hardhat-network/reference/#json-rpc-methods-support} for a complete reference.
    */
   send(method: string, params?: any[]): Promise<any>
+
+  /**
+   * The hardhat runtime environment.
+   * Most usage should use the wrapper methods instead of accessing hre directly.
+   */
+  readonly hre: HardhatRuntimeEnvironment
 }
