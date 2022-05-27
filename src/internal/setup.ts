@@ -7,6 +7,27 @@ import { HardhatNetworkAccountsConfig, JsonRpcServer } from 'hardhat/types'
 import { toExternallyOwnedAccounts } from './accounts'
 import { Hardhat } from './hardhat'
 
+/**
+ * Use this setup function to subclass your own jest environment.
+ *
+ * @example
+ * import NodeEnvironment from 'jest-environment-node'
+ * import setup from '@uniswap/jest-environment-hardhat/setup'
+ * export default class HardhatNodeEnvironment extends NodeEnvironment {
+ *   _teardown: Awaited<ReturnType<typeof setup>> = () => Promise.resolve()
+ *   async setup() {
+ *     await super.setup()
+ *     this._teardown = await setup()
+ *     this.global.hardhat = hardhat
+ *   }
+ *   async teardown() {
+ *     await this._teardown()
+ *     await super.teardown()
+ *   }
+ * }
+ *
+ * @returns teardown
+ */
 export default async function setup(): Promise<() => Promise<void>> {
   if (!hre.ethers) {
     throw new Error(

@@ -16,7 +16,7 @@ export class Hardhat implements IHardhat {
   readonly providers: JsonRpcProvider[]
 
   constructor(
-    private hre: HardhatRuntimeEnvironment,
+    readonly hre: HardhatRuntimeEnvironment,
     readonly url: string,
     readonly accounts: ExternallyOwnedAccount[]
   ) {
