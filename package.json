@@ -6,7 +6,7 @@
   "author": "Zach Pomerantz <zzmp@uniswap.org>",
   "license": "GPL-3.0-or-later",
   "main": "dist/node.js",
-  "types": "dist/types/hardhat.d.ts",
+  "types": "dist/hardhat.d.ts",
   "scripts": {
     "prepare": "yarn compile",
     "prepublishOnly": "yarn build",
@@ -14,8 +14,18 @@
     "build": "tsc",
     "release": "semantic-release",
     "lint": "eslint .",
-    "test": "jest test/",
+    "test": "jest src/ --coverage",
     "test:e2e": "jest e2e/ --testSequencer ./e2e/sequencer.js --maxWorkers 2"
+  },
+  "jest": {
+    "collectCoverageFrom": ["src/internal/**"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100
+      }
+    }
   },
   "dependencies": {
     "setimmediate": "^1.0.5"

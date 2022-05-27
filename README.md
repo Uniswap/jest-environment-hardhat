@@ -50,9 +50,9 @@ You may also configure your test environment through the `jest.config.js` file, 
 
 Using the environment will expose `hardhat` on the global scope, which you can use to interact with the hardhat network in your tests.
 
-For documentation on the hardhat global, see the [type definitions](./src/types/hardhat.ts).
+For documentation on the hardhat global, see the [type definitions](./src/hardhat.ts).
 
-For examples of how to interact with the hardhat network, see the [tests](./test/hardhat.test.ts).
+For examples of how to interact with the hardhat network, see the [tests](./src/internal/hardhat.test.ts).
 
 ### Typescript
 

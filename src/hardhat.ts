@@ -1,151 +1,86 @@
-import 'setimmediate'
-
 import { ExternallyOwnedAccount, Signer } from '@ethersproject/abstract-signer'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
-import assert from 'assert'
-import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
-import { Erc20__factory } from './types'
-import { AddressLike, Hardhat as IHardhat } from './types/hardhat'
-import { WHALES } from './whales'
+declare global {
+  // var is required to add the typing to globalThis.
+  // eslint-disable-next-line no-var
+  var hardhat: Hardhat
 
-type OneOrMany<T> = T | T[]
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS {
+    interface Global {
+      hardhat: Hardhat
+    }
+  }
+}
 
-export class Hardhat implements IHardhat {
+export type AddressLike = string | { address: string }
+
+export interface Hardhat {
+  /** The JSON-RPC url to connect to the hardhat network. */
+  readonly url: string
+
+  /** The accounts configured via hardhat's {@link https://hardhat.org/hardhat-network/reference/#accounts}. */
+  readonly accounts: ExternallyOwnedAccount[]
+  /** The first account configured via hardhat - @see {@link accounts}. */
+  readonly account: ExternallyOwnedAccount
+
+  /** The signing providers configured via hardhat's {@link https://hardhat.org/hardhat-network/reference/#accounts}. */
   readonly providers: JsonRpcProvider[]
+  /** The first signing provider configured via hardhat - @see {@link providers}. */
+  readonly provider: JsonRpcProvider
 
-  constructor(
-    private hre: HardhatRuntimeEnvironment,
-    readonly url: string,
-    readonly accounts: ExternallyOwnedAccount[]
-  ) {
-    this.providers = accounts.map(
-      (account) =>
-        new Proxy(hre.ethers.provider, {
-          get(target, prop) {
-            switch (prop) {
-              case 'listAccounts':
-                return () => Promise.resolve([account.address])
-              case 'getSigner':
-                return () => hre.ethers.provider.getSigner(account.address)
-              default:
-                return Reflect.get(target, prop)
-            }
-          },
-        })
-    )
-  }
+  /**
+   * Resets the mainnet fork.
+   * @param blockNumber The blockNumber to fork. If unspecified, uses the blockNumber from hardhat.config.js.
+   */
+  fork(blockNumber?: number): Promise<void>
+  /**
+   * A convenience method to reset the mainnet fork and fund an account with ETH / ERC-20's.
+   * @see {@link fork} and {@link fund}.
+   */
+  forkAndFund(address: AddressLike, amount: CurrencyAmount<Currency>): Promise<void>
+  forkAndFund(address: AddressLike, amounts: CurrencyAmount<Currency>[]): Promise<void>
 
-  get account() {
-    return this.accounts[0]
-  }
+  /** Gets the balance of ETH ERC-20's held by the address. */
+  getBalance(address: AddressLike, currency: Currency): Promise<CurrencyAmount<Currency>>
+  getBalance(address: AddressLike, currencies: Currency[]): Promise<CurrencyAmount<Currency>>[]
 
-  get provider() {
-    return this.providers[0]
-  }
+  /** Attempts to fund an account with ETH or ERC-20's. @see {@link fund}. */
+  setBalance(address: AddressLike, amount: CurrencyAmount<Currency>, whales?: string[]): Promise<void>
+  setBalance(address: AddressLike, amounts: CurrencyAmount<Currency>[], whales?: string[]): Promise<void>
 
-  fork(blockNumber = this.hre.config.networks.hardhat.forking?.blockNumber) {
-    return this.hre.network.provider.send('hardhat_reset', [
-      {
-        forking: { jsonRpcUrl: this.hre.config.networks.hardhat.forking?.url, blockNumber },
-      },
-    ])
-  }
+  /**
+   * Attempts to fund an account with ETH / ERC-20's.
+   * If amount is in ETH, funds the account directly. (NB: Hardhat initially funds test accounts with 1000 ETH.)
+   * If amount is an ERC-20, attempts to transfer the amount from a list of known whales.
+   * @param address The address of the account to fund.
+   * @param amount If in ETH, the amount to set the balance to. If an ERC-20, the amount to transfer.
+   * @param whales If set, overrides the list of known whale addresses from which to transfer ERC-20's.
+   */
+  fund(address: AddressLike, amount: CurrencyAmount<Currency>, whales?: string[]): Promise<void>
+  fund(address: AddressLike, amounts: CurrencyAmount<Currency>[], whales?: string[]): Promise<void>
 
-  async forkAndFund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>) {
-    if (!Array.isArray(amounts)) return this.forkAndFund(address, [amounts])
-
-    await hardhat.fork()
-    return hardhat.fund(address, amounts)
-  }
-
-  getBalance(address: AddressLike, currencies: OneOrMany<Currency>) {
-    if (!Array.isArray(currencies)) return this.getBalance(address, [currencies])[0]
-    if (typeof address !== 'string') return this.getBalance(address.address, currencies)
-
-    return currencies.map(async (currency) => {
-      const balance = await (() => {
-        if (currency.isNative) return this.hre.ethers.provider.getBalance(address)
-        assert(currency.isToken)
-
-        const token = Erc20__factory.connect(currency.address, this.hre.ethers.provider)
-        return token.balanceOf(address)
-      })()
-      return CurrencyAmount.fromRawAmount(currency, balance.toString())
-    })
-  }
-
-  setBalance(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES) {
-    return this.fund(address, amounts, whales)
-  }
-
-  fund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES) {
-    if (!Array.isArray(amounts)) return this.fund(address, [amounts], whales)
-    if (typeof address !== 'string') return this.fund(address.address, amounts, whales)
-
-    const impersonations = whales.map((whale) => this.hre.network.provider.send('hardhat_impersonateAccount', [whale]))
-
-    return Promise.all(
-      amounts.map(async (amount) => {
-        const { currency } = amount
-        const balance = this.hre.ethers.utils.parseUnits(amount.toExact(), currency.decimals)
-
-        if (currency.isNative) {
-          return this.hre.network.provider.send('hardhat_setBalance', [
-            address,
-            this.hre.ethers.utils.hexValue(balance),
-          ])
-        }
-        assert(currency.isToken)
-
-        for (let i = 0; i < whales.length; ++i) {
-          await impersonations[i]
-          const whale = this.hre.ethers.provider.getSigner(whales[i])
-          try {
-            const token = Erc20__factory.connect(currency.address, whale)
-            await token.transfer(address, balance)
-            return
-          } catch (e) {
-            throw new Error(`Could not fund ${amount.toExact()} ${currency.symbol} from any whales`)
-          }
-        }
-      })
-    )
-  }
-
+  /**
+   * Approves the spender to spend currencies on behalf of an account.
+   * @param account The account which owns the currency.
+   * @param spender The address of the spender.
+   */
   approve(
     account: ExternallyOwnedAccount | Signer,
     spender: AddressLike,
-    currencies: OneOrMany<Currency | CurrencyAmount<Currency>>
-  ) {
-    if (!Array.isArray(currencies)) return this.approve(account, spender, [currencies])
-    if (typeof spender !== 'string') return this.approve(account, spender.address, currencies)
+    currency: Currency | CurrencyAmount<Currency>
+  ): Promise<void>
+  approve(
+    account: ExternallyOwnedAccount | Signer,
+    spender: AddressLike,
+    currencies: (Currency | CurrencyAmount<Currency>)[]
+  ): Promise<void>
 
-    return Promise.all(
-      currencies.map(async (currencyOrAmount) => {
-        const [currency, limit] =
-          'currency' in currencyOrAmount
-            ? [
-                currencyOrAmount.currency,
-                this.hre.ethers.utils.parseUnits(currencyOrAmount.toExact(), currencyOrAmount.currency.decimals),
-              ]
-            : [currencyOrAmount, this.hre.ethers.constants.MaxUint256]
-        if (currency.isNative) return
-        assert(currency.isToken)
-
-        const signer = Signer.isSigner(account)
-          ? account
-          : new this.hre.ethers.Wallet(account, this.hre.ethers.provider)
-        const token = Erc20__factory.connect(currency.address, signer)
-
-        const approval = await token.approve(spender, limit)
-        return approval.wait()
-      })
-    )
-  }
-
-  send(method: string, params?: any[]) {
-    return this.hre.network.provider.send(method, params)
-  }
+  /**
+   * Sends messages to the hardhat network.
+   * @see {@link https://hardhat.org/hardhat-network/reference/#json-rpc-methods-support} for a complete reference.
+   */
+  send(method: string, params?: any[]): Promise<any>
 }

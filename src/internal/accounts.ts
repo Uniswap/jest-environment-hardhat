@@ -3,12 +3,6 @@ import { HDNode } from '@ethersproject/hdnode'
 import { ethers } from 'hardhat'
 import { HardhatNetworkAccountsConfig } from 'hardhat/types'
 
-if (!ethers) {
-  throw new Error(
-    'jest-environment-hardhat requires the hardhat-ethers plugin to be installed.\nSee https://hardhat.org/plugins/nomiclabs-hardhat-ethers.html#hardhat-ethers.'
-  )
-}
-
 /** Derives ExternallyOwnedAccounts (ie private keys and addresses) from a hardhat accounts configuration. */
 export function toExternallyOwnedAccounts(accounts: HardhatNetworkAccountsConfig): ExternallyOwnedAccount[] {
   if (Array.isArray(accounts)) {

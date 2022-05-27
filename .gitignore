@@ -12,6 +12,8 @@ node_modules/
 
 # builds
 dist/
+.env
+coverage/
 
 # IDE metadata
 .idea/
@@ -19,7 +21,6 @@ dist/
 *.swp
 
 # misc
-.env
 .DS_Store
 .netlify/
 npm-debug.log*
