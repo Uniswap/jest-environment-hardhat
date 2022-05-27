@@ -58,3 +58,6 @@ For examples of how to interact with the hardhat network, see the [tests](./src/
 
 If you are using Typescript, you can import types by adding `import @uniswap/jest-environment-hardat` to your test file, or by adding `@uniswap/jest-environment-hardhat` types to your `tsconfig`.
 
+---
+
+Made with 🦄 by [Uniswap Labs](https://uniswap.org)
