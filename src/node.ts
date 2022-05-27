@@ -1,3 +1,4 @@
+import { EnvironmentContext, JestEnvironmentConfig } from '@jest/environment'
 import NodeEnvironment from 'jest-environment-node'
 
 import setup from './setup'
@@ -5,7 +6,7 @@ import setup from './setup'
 export default class HardhatNodeEnvironment extends NodeEnvironment {
   _teardown: Awaited<ReturnType<typeof setup>> = () => Promise.resolve()
 
-  constructor(config, context) {
+  constructor(config: JestEnvironmentConfig, context: EnvironmentContext) {
     super(config, context)
   }
 
