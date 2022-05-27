@@ -6,8 +6,8 @@ import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import assert from 'assert'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
-import { Erc20__factory } from './types'
-import { AddressLike, Hardhat as IHardhat } from './types/hardhat'
+import { Erc20__factory } from '../types'
+import { AddressLike, Hardhat as IHardhat } from '../types/hardhat'
 import { WHALES } from './whales'
 
 type OneOrMany<T> = T | T[]
@@ -45,7 +45,7 @@ export class Hardhat implements IHardhat {
     return this.providers[0]
   }
 
-  fork(blockNumber = this.hre.config.networks.hardhat.forking?.blockNumber) {
+  fork(blockNumber = this.hre.config.networks.hardhat.forking?.blockNumber): Promise<void> {
     return this.hre.network.provider.send('hardhat_reset', [
       {
         forking: { jsonRpcUrl: this.hre.config.networks.hardhat.forking?.url, blockNumber },
@@ -54,10 +54,8 @@ export class Hardhat implements IHardhat {
   }
 
   async forkAndFund(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>): Promise<void> {
-    if (!Array.isArray(amounts)) return this.forkAndFund(address, [amounts])
-
-    await hardhat.fork()
-    return hardhat.fund(address, amounts)
+    await this.fork()
+    return this.fund(address, amounts)
   }
 
   getBalance(address: AddressLike, currencies: Currency): Promise<CurrencyAmount<Currency>>
@@ -78,7 +76,7 @@ export class Hardhat implements IHardhat {
     })
   }
 
-  setBalance(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>, whales = WHALES) {
+  setBalance(address: AddressLike, amounts: OneOrMany<CurrencyAmount<Currency>>, whales?: string[]) {
     return this.fund(address, amounts, whales)
   }
 
