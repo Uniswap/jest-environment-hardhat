@@ -1,7 +1,9 @@
 import 'setimmediate'
 
+import { JsonRpcProvider } from '@ethersproject/providers'
 import hre from 'hardhat'
 import { TASK_NODE, TASK_NODE_GET_PROVIDER, TASK_NODE_SERVER_READY } from 'hardhat/builtin-tasks/task-names'
+import { HARDHAT_NETWORK_RESET_EVENT, HARDHAT_NETWORK_REVERT_SNAPSHOT_EVENT } from 'hardhat/internal/constants'
 import { HardhatNetworkAccountsConfig, JsonRpcServer } from 'hardhat/types'
 
 import { toExternallyOwnedAccounts } from './accounts'
@@ -40,7 +42,7 @@ export default async function setup(): Promise<() => Promise<void>> {
     )
   }
 
-  // Override the GET_PROVIDER task to avoid unnecessary time-intensive evm calls.
+  // Overrides the GET_PROVIDER task to avoid unnecessary time-intensive evm calls.
   hre.tasks[TASK_NODE_GET_PROVIDER].setAction(async () => hre.network.provider)
   const id = Number(process.env.JEST_WORKER_ID)
   const port = 8545 + (Number.isNaN(id) ? 0 : id)
@@ -67,8 +69,20 @@ export default async function setup(): Promise<() => Promise<void>> {
     await hre.network.provider.send('hardhat_setLoggingEnabled', [true])
   }
 
+  hre.network.provider.prependListener(HARDHAT_NETWORK_RESET_EVENT, () => resetJsonRpcProvider(hre.ethers.provider))
+  hre.network.provider.prependListener(HARDHAT_NETWORK_REVERT_SNAPSHOT_EVENT, () =>
+    resetJsonRpcProvider(hre.ethers.provider)
+  )
+
   return async () => {
+    resetJsonRpcProvider(hre.ethers.provider)
     await server.close()
     await run
   }
+}
+
+/** Prevents a JsonRpcProvider from continuing to run its internal timers. */
+function resetJsonRpcProvider(provider: JsonRpcProvider) {
+  clearTimeout(provider._bootstrapPoll)
+  provider.removeAllListeners()
 }
