@@ -45,7 +45,7 @@ export class Hardhat implements IHardhat {
     return this.providers[0]
   }
 
-  fork(blockNumber = this.hre.config.networks.hardhat.forking?.blockNumber): Promise<void> {
+  async fork(blockNumber = this.hre.config.networks.hardhat.forking?.blockNumber): Promise<void> {
     return this.hre.network.provider.send('hardhat_reset', [
       {
         forking: { jsonRpcUrl: this.hre.config.networks.hardhat.forking?.url, blockNumber },
