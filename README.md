@@ -6,13 +6,13 @@
 
 A jest environment with hardhat built in.
 
-`jest-environment-hardhat` is a drop-in jest environment for running hardhat inline with your tests. Instead of running a separate `hardhat node`, this environment runs a node and exposes a global `Hardhat` interface to interact with it.
+`jest-environment-hardhat` is a drop-in jest environment for running hardhat inline with your tests. Instead of running a separate `hardhat node`, this environment runs a node and exposes a global `Hardhat` interface - with some helper utilities - to interact with it.
 
 ## Installation
 
-First, install `jest-environment-hardhat` and its dependencies using `yarn`.
+First, install `jest-environment-hardhat` and its dependencies (using `yarn` or `npm`).
 
-The environment needs `@nomiclabs/hardhat-ethers`, `ethers`, and `hardhat` installed to run. These are installed as peer dependencies to ensure that you retain control over versioning.
+The environment needs `@nomiclabs/hardhat-ethers`, `ethers`, and `hardhat` installed as well. These are installed as peer dependencies to ensure that you retain control over versioning, so you'll need to install them explicitly.
 
 ```sh
 yarn add -D @nomiclabs/hardhat-ethers ethers hardhat
@@ -21,30 +21,33 @@ yarn add -D jest-environment-hardhat
 
 Then, use the runner either using a doc-comment, or using jest configuration. See the [jest documentation](https://jestjs.io/docs/configuration#testenvironment-string) for more.
 
-`jest-environment-hardhat` extends a `node` environment by default. A `jsdom` environment is also available, using `jest-environment-hardhat/dist/jsdom`.
-
-### Using a doc-comment
-
-Files starting with a `@jest-environment` preamble use the specified runner:
-
-```js
+```
 /**
- * @jest-environment jest-environment-hardhat
+ * @jest-environment hardhat
  */
+
+test('use hardhat in this test file', () => {
+  expect(hardhat).toBeDefined()
+})
 ```
 
-### Using jest configuration
+`jest-environment-hardhat` extends a `node` environment by default. A `jsdom` environment is also available, using  `hardhat/dist/jsdom`.
 
-You may also configure your test environment through the `jest.config.js` file, using the [`testEnvironment`](https://jestjs.io/docs/configuration#testenvironment-string) property.
+```
+/**
+ * @jest-environment hardhat/dist/jsdom
+ */
 
-```json
-  "testEnvironment": "jest-environment-hardhat",
+test('use hardhat and jsdom in this test file', () => {
+  expect(hardhat).toBeDefined()
+  const element = document.createElement('div')
+  expect(element).not.toBeNull()
+})
 ```
 
 ### Subclassing your own runner
 
-`jest-environment-hardhat` exports a `node` and `jsdom` environment. If you'd like to extend your own environment, you can use the setup function exported by `jest-environment-hardhat/setup`. See [`src/node.ts`](./src/node.ts) for an example.
-
+`jest-environment-hardhat` exports a `node` (by default) and `jsdom` environment. If you'd like to extend your own environment, you can use the setup function exported by `jest-environment-hardhat/setup`. See [`src/node.ts`](./src/node.ts) for an example.
 
 ## Documentation
 
