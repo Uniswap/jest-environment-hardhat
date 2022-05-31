@@ -1,5 +1,5 @@
 {
-  "name": "@uniswap/jest-environment-hardhat",
+  "name": "jest-environment-hardhat",
   "version": "1.0.0",
   "description": "A jest environment with hardhat built in",
   "repository": "https://github.com/Uniswap/jest-environment-hardhat",

@@ -14,7 +14,7 @@ import { Hardhat } from './hardhat'
  *
  * @example
  * import NodeEnvironment from 'jest-environment-node'
- * import setup from '@uniswap/jest-environment-hardhat/setup'
+ * import setup from 'jest-environment-hardhat/setup'
  * export default class HardhatNodeEnvironment extends NodeEnvironment {
  *   _teardown: Awaited<ReturnType<typeof setup>> = () => Promise.resolve()
  *   async setup() {
