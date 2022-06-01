@@ -12,14 +12,14 @@ A jest environment with hardhat built in.
 
 First, install `jest-environment-hardhat` and its dependencies (using `yarn` or `npm`).
 
-The environment needs `@nomiclabs/hardhat-ethers`, `ethers`, and `hardhat` installed as well. These are installed as peer dependencies to ensure that you retain control over versioning, so you'll need to install them explicitly.
+The environment needs `@nomiclabs/hardhat-ethers`, `ethers`, and `hardhat` installed as well. These are installed as peer dependencies to ensure that you retain control over versioning, so you'll need to install them explicitly:
 
 ```sh
 yarn add -D @nomiclabs/hardhat-ethers ethers hardhat
 yarn add -D jest-environment-hardhat
 ```
 
-Then, use the runner either using a doc-comment, or using jest configuration. See the [jest documentation](https://jestjs.io/docs/configuration#testenvironment-string) for more.
+Then, use the runner either using a doc-comment, or using jest configuration (see the [jest documentation](https://jestjs.io/docs/configuration#testenvironment-string) for details):
 
 ```
 /**
@@ -31,11 +31,11 @@ test('use hardhat in this test file', () => {
 })
 ```
 
-`jest-environment-hardhat` extends a `node` environment by default. A `jsdom` environment is also available, using  `hardhat/dist/jsdom`.
+`jest-environment-hardhat` extends a `node` environment by default. A `jsdom` environment is also available, using  `hardhat/jsdom`.
 
 ```
 /**
- * @jest-environment hardhat/dist/jsdom
+ * @jest-environment hardhat/jsdom
  */
 
 test('use hardhat and jsdom in this test file', () => {
@@ -47,19 +47,33 @@ test('use hardhat and jsdom in this test file', () => {
 
 ### Subclassing your own runner
 
-`jest-environment-hardhat` exports a `node` (by default) and `jsdom` environment. If you'd like to extend your own environment, you can use the setup function exported by `jest-environment-hardhat/setup`. See [`src/node.ts`](./src/node.ts) for an example.
+`jest-environment-hardhat` subclasses a `node` environment by default, and exports a `jsdom` environment under `hardhat/jsdom`.
+
+If you'd like to extend your own environment, you can use the setup function exported by `jest-environment-hardhat/setup`. See [`src/node.ts`](./src/node.ts) for an example.
 
 ## Documentation
 
 Using the environment will expose `hardhat` on the global scope, which you can use to interact with the hardhat network in your tests.
 
-For documentation on the hardhat global, see the [type definitions](./src/hardhat.ts).
+For documentation on the hardhat global, see the [type declarations](./src/hardhat.ts).
 
 For examples of how to interact with the hardhat network, see the [tests](./src/internal/hardhat.test.ts).
 
 ### Typescript
 
-If you are using Typescript, you can import types by adding `import jest-environment-hardat` to your test file, or by adding `jest-environment-hardhat` types to your `tsconfig`.
+If you are using Typescript, import types by importing the library in your test or setup file:
+
+```
+/**
+ * @jest-environment hardhat
+ */
+
+import 'jest-environment-hardat'
+
+test('use hardhat in this test file', () => {
+  expect(hardhat).toBeDefined()
+})
+```
 
 ---
 
