@@ -2,6 +2,7 @@ import 'setimmediate'
 
 import { ExternallyOwnedAccount, Signer } from '@ethersproject/abstract-signer'
 import { JsonRpcProvider } from '@ethersproject/providers'
+import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import assert from 'assert'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
@@ -16,7 +17,7 @@ export class Hardhat implements IHardhat {
   readonly providers: JsonRpcProvider[]
 
   constructor(
-    readonly hre: HardhatRuntimeEnvironment,
+    readonly hre: HardhatRuntimeEnvironment & { ethers: HardhatEthersHelpers },
     readonly url: string,
     readonly accounts: ExternallyOwnedAccount[]
   ) {

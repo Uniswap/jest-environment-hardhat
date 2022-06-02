@@ -6,6 +6,8 @@
         "sourceType": "module"
     },
     "ignorePatterns": [
+        "jsdom.js",
+        "node.js",
         "abis",
         "dist/",
         "src/types/"
