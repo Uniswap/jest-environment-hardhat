@@ -20,7 +20,7 @@ yarn add -D jest-environment-hardhat
 ```
 
 Then, set up your `hardhat.config.js` file.
-You'll need to [require `@nomiclabs/hardhat-ethers` from your `hardhat.config.js` file[(https://github.com/NomicFoundation/hardhat/tree/master/packages/hardhat-ethers#installation)] in order to install it as a hardhat plugin.
+You'll need to [require `@nomiclabs/hardhat-ethers` from your `hardhat.config.js` file](https://github.com/NomicFoundation/hardhat/tree/master/packages/hardhat-ethers#installation) in order to install it as a hardhat plugin.
 You'll also need to [configure mainnet forking](https://hardhat.org/hardhat-network/guides/mainnet-forking#forking-from-mainnet) to set the initial state of the hardhat network within jest.
 
 NOTE: You should set the [`accounts` field](https://hardhat.org/hardhat-network/reference#accounts) to be as few as possible to reduce startup time for your tests' hardhat network.
