@@ -1,5 +1,6 @@
 import { ExternallyOwnedAccount, Signer } from '@ethersproject/abstract-signer'
 import { JsonRpcProvider } from '@ethersproject/providers'
+import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
@@ -95,5 +96,5 @@ export interface Hardhat {
    * The hardhat runtime environment.
    * Most usage should use the wrapper methods instead of accessing hre directly.
    */
-  readonly hre: HardhatRuntimeEnvironment
+  readonly hre: HardhatRuntimeEnvironment & { ethers: HardhatEthersHelpers }
 }
