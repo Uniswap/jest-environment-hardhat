@@ -108,9 +108,12 @@ export class Hardhat implements IHardhat {
             await token.transfer(address, balance)
             return
           } catch (e) {
-            throw new Error(`Could not fund ${amount.toExact()} ${currency.symbol} from any whales`)
+            // Silently catch so we try the next whale.
           }
         }
+
+        // Tried all the whales and couldn't fund. Error out.
+        throw new Error(`Could not fund ${amount.toExact()} ${currency.symbol} from any whales`)
       })
     )
   }
