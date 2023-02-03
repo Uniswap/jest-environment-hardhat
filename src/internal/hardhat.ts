@@ -113,7 +113,12 @@ export class Hardhat implements IHardhat {
         }
 
         // Tried all the whales and couldn't fund. Error out.
-        throw new Error(`Could not fund ${amount.toExact()} ${currency.symbol} from any whales`)
+        const blockNumber = await hardhat.provider.getBlockNumber()
+        throw new Error(
+          `Could not fund ${amount.toExact()} ${
+            currency.symbol
+          } from any whales on block ${blockNumber}. Update your call to fund() to specify additional 'whale' addresses that hold sufficient balance of the token you are trying to fund.`
+        )
       })
     )
   }
