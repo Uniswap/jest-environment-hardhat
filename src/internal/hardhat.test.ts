@@ -153,13 +153,20 @@ describe('Hardhat', () => {
 
     it('uses custom whales', async () => {
       const amount = CurrencyAmount.fromRawAmount(USDT, 10000).multiply(10 ** USDT.decimals)
-      await expect(hardhat.fund(hardhat.account, amount)).rejects.toThrowError(
-        'Could not fund 10000 USDT from any whales'
-      )
+      // Try fund from address with no USDT.
+      await expect(
+        hardhat.fund(hardhat.account, amount, ['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'])
+      ).rejects.toThrowError('Could not fund 10000 USDT from any whales')
 
+      // Successfully fund from address with USDT.
       await hardhat.fund(hardhat.account, amount, [USDT_TREASURY])
       const balance = await hardhat.getBalance(hardhat.account, USDT)
       expect(balance.toExact()).toBe('10000')
+
+      // Successfully funds when 2nd whale has USDT but 1st doesnt.
+      await hardhat.fund(hardhat.account, amount, ['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', USDT_TREASURY])
+      const balance2 = await hardhat.getBalance(hardhat.account, USDT)
+      expect(balance2.toExact()).toBe('20000')
     })
   })
 
