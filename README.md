@@ -74,7 +74,7 @@ If you are using Typescript, import types by importing the library in your test 
  * @jest-environment hardhat
  */
 
-import 'jest-environment-hardat'
+import 'jest-environment-hardhat'
 
 test('use hardhat in this test file', () => {
   expect(hardhat).toBeDefined()
