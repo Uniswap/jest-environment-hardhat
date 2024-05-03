@@ -6,6 +6,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment:
+      name: release
     steps:
       - uses: actions/checkout@v3
 
@@ -14,6 +16,16 @@ jobs:
           node-version: 14
           registry-url: https://registry.npmjs.org
           cache: 'yarn'
+
+      - name: Load secret
+        uses: 1password/load-secrets-action@581a835fb51b8e7ec56b71cf2ffddd7e68bb25e0
+        with:
+          # Export loaded secrets as environment variables
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          NPM_TOKEN: op://npm-public-deploy/public-test-npm-deploy/credential
+          GITHUB_TOKEN: op://npm-public-deploy/GITHUB_TOKEN/token 
 
       - run: yarn install --frozen-lockfile
 
@@ -31,5 +43,5 @@ jobs:
         if: success()
         env:
           NPM_CONFIG_USERCONFIG: /dev/null
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ env.NPM_TOKEN }}
